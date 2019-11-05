@@ -79,6 +79,7 @@ const arrKeyValue = [row1Key, row2Key, row3Key, row4Key, row5Key];
 if (localStorage.lang === 'en') localStorage.lang = 'ru'
 else localStorage.lang = 'en';
 let lang = localStorage.lang || 'en';
+let stateCaps = false;
 
 
 function drawRow(arrKey, parent) {
@@ -123,11 +124,14 @@ function drawKeyboard() {
   row5.querySelector('div:nth-child(4)').classList.add('keyboard__space');
 
   document.body.appendChild(keyboardFragment);
+
 }
 
 function fillKey(param) {
   if (param === 'en') indexLang = 3;
   else indexLang = 1;
+
+  if (stateCaps)
 
 
 
@@ -142,3 +146,5 @@ function fillKey(param) {
 drawKeyboard();
 arrKeyElements = [row1, row2, row3, row4, row5];
 fillKey(lang);
+
+
