@@ -1,3 +1,10 @@
+
+localStorage.lang = localStorage.lang || 'en';
+console.log(`First: ${localStorage.lang}`);
+if (localStorage.lang === 'en') localStorage.lang = 'ru'
+else localStorage.lang = 'en'
+
+
 function drawKeyboard() {
   const row1Key = [
     ['Backquote', 'ё', 'Ё', '`', '~'],
