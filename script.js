@@ -69,18 +69,20 @@ const row5Key = [
   ['MetaRight', 'Win', 'Win', 'Win', 'Win'],
   ['ControlRight', 'Ctrl', 'Ctrl', 'Ctrl', 'Ctrl'],
 ];
+const arrKeyValue = [row1Key, row2Key, row3Key, row4Key, row5Key];
+const keyboardFragment = document.createDocumentFragment();
+const textarea = document.createElement('textarea');
+const keyboard = document.createElement('div');
 let row1;
 let row2;
 let row3;
 let row4;
 let row5;
 let arrKeyElements = [];
-const arrKeyValue = [row1Key, row2Key, row3Key, row4Key, row5Key];
-if (localStorage.lang === 'en') localStorage.lang = 'ru'
+if (localStorage.lang === 'en') localStorage.lang = 'ru';
 else localStorage.lang = 'en';
 let lang = localStorage.lang || 'en';
-let stateCaps = false;
-
+let stateCaps = localStorage.stateCaps || false;
 
 function drawRow(arrKey, parent) {
   const row = document.createElement('div');
@@ -95,12 +97,7 @@ function drawRow(arrKey, parent) {
   return row;
 }
 
-
 function drawKeyboard() {
-  const keyboardFragment = document.createDocumentFragment();
-  const textarea = document.createElement('textarea');
-  const keyboard = document.createElement('div');
-
   textarea.className = 'textarea';
   keyboardFragment.appendChild(textarea);
   keyboard.className = 'keyboard';
@@ -124,27 +121,40 @@ function drawKeyboard() {
   row5.querySelector('div:nth-child(4)').classList.add('keyboard__space');
 
   document.body.appendChild(keyboardFragment);
-
 }
 
 function fillKey(param) {
   if (param === 'en') indexLang = 3;
   else indexLang = 1;
 
-  if (stateCaps)
-
-
+  if (stateCaps) indexLang++;
 
   arrKeyElements.forEach((row, rowIndex) => {
     Array.prototype.forEach.call(row.children, (key, keyIndex) => {
       const tempKey = key;
+      tempKey.id = arrKeyValue[rowIndex][keyIndex][0];
       tempKey.innerHTML = arrKeyValue[rowIndex][keyIndex][indexLang];
     });
   });
 }
 
+function updateStyleActiveKey(event) {
+  const classListKey = document.getElementById(event.code).classList;
+  if (!classListKey.contains('active-key')) classListKey.add('active-key');
+}
+function updateStyleInactiveKey(event) {
+  const classListKey = document.getElementById(event.code).classList;
+  if (classListKey.contains('active-key')) classListKey.remove('active-key');
+}
+
+function updateStateKeyboardCaps(event) {
+  if (event.code === 'Capslock') {
+  }
+}
+
 drawKeyboard();
 arrKeyElements = [row1, row2, row3, row4, row5];
 fillKey(lang);
-
-
+document.addEventListener('keydown', updateStateKeyboardCaps);
+document.addEventListener('keydown', updateStyleActiveKey);
+document.addEventListener('keyup', updateStyleInactiveKey);

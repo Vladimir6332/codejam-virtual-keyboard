@@ -46,6 +46,10 @@
   -ms-user-select: none;
 }
 
+.active-key {
+  background: cornflowerblue;
+}
+
 .keyboard__backspace {
   width: 90px;
 }
