@@ -1,0 +1,104 @@
+* {
+  margin: 0;
+}
+
+.keyboard-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.textarea {
+  width: 100%;
+  max-width: 800px;
+  height: 100px;
+}
+
+.keyboard {
+  display: flex;
+  max-width: 1020px;
+  margin-top: 30px;
+  padding: 10px;
+  border-radius: 10px;
+  flex-direction: column;
+  background-color: rgb(226, 209, 209);
+}
+
+.keyboard__row {
+  display: flex;
+  justify-content: space-between;
+}
+
+@keyframes anime {
+  0% {
+    background-color: cornflowerblue;
+  }
+  100% {
+    background-color: rgb(241, 241, 126);
+  }
+}
+
+.keyboard__key {
+  display: flex;
+  margin: 5px;
+  border-radius: 5px;
+  width: 40px;
+  height: 35px;
+  background-color: rgb(241, 241, 126);
+  font-size: 16px;
+  color: darkred;
+  align-items: center;
+  justify-content: center;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  cursor: pointer;
+}
+
+.key-animate {
+  animation: anime 1.5s linear;
+}
+
+.keyboard__key:hover {
+  background: cornsilk;
+  color: black;
+}
+
+.keyboard__key-functional {
+  background: rgb(245, 178, 34);
+}
+
+.active-key {
+  background: cornflowerblue;
+}
+
+.keyboard__backspace {
+  width: 90px;
+}
+
+.keyboard__tab,
+.keyboard__del {
+  width: 50px;
+}
+
+.keyboard__caps,
+.keyboard__enter {
+  width: 80px;
+}
+
+.keyboard__shift-left {
+  width: 100px;
+}
+
+.keyboard__shift-right {
+  width: 125px;
+}
+
+.keyboard__ctrl-win-alt {
+  width: 60px;
+}
+
+.keyboard__space {
+  width: 400px;
+}
