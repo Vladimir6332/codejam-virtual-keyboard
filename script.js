@@ -126,10 +126,11 @@ function drawKeyboard() {
 }
 
 function fillKey(param) {
+  let indexLang;
   if (param === 'en') indexLang = 3;
   else indexLang = 1;
 
-  if (stateCaps) indexLang++;
+  if (stateCaps) indexLang += 1;
 
   arrKeyElements.forEach((row, rowIndex) => {
     Array.prototype.forEach.call(row.children, (key, keyIndex) => {
@@ -143,12 +144,16 @@ function fillKey(param) {
 function updateStyleActiveKey(event) {
   event.preventDefault();
   const classListKey = document.getElementById(event.code).classList;
+  classListKey.remove('key-animate');
   if (!classListKey.contains('active-key')) classListKey.add('active-key');
 }
 function updateStyleInactiveKey(event) {
   if (event.code === 'CapsLock' && stateCaps) return;
   const classListKey = document.getElementById(event.code).classList;
-  if (classListKey.contains('active-key')) classListKey.remove('active-key');
+  if (classListKey.contains('active-key')) {
+    classListKey.add('key-animate');
+    classListKey.remove('active-key');
+  }
 }
 
 function updateActiveCapsShift(event) {
@@ -159,6 +164,8 @@ function updateActiveCapsShift(event) {
 }
 
 function updateStateInactiveShift(event) {
+  event.stopPropagation();
+  event.preventDefault();
   if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') {
     stateCaps = !stateCaps;
     fillKey(lang);
@@ -169,21 +176,19 @@ function inputKeyToTextarea(event) {
   event.preventDefault();
   let keyValue;
   arrKeyValue.forEach(row => {
-    let key = row.filter(key => key[0] === event.code);
-    if (key[0]) {
+    const keySearched = row.filter(key => key[0] === event.code);
+    if (keySearched[0]) {
       if (lang === 'en') {
-        if (stateCaps) keyValue = key[0][4];
-        else keyValue = key[0][3];
-      } else {
-        if (stateCaps) keyValue = key[0][2];
-        else keyValue = key[0][1];
-      }
+        if (stateCaps) keyValue = keySearched[0][4];
+        else keyValue = keySearched[0][3];
+      } else if (stateCaps) keyValue = keySearched[0][2];
+      else keyValue = keySearched[0][1];
     }
   });
   if (keyValue.length === 1) {
-    let start = textarea.selectionStart;
-    let end = textarea.selectionEnd;
-    let finText = textarea.value.substring(0, start) + keyValue + textarea.value.substring(end);
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const finText = textarea.value.substring(0, start) + keyValue + textarea.value.substring(end);
     textarea.value = finText;
     textarea.focus();
     textarea.selectionEnd = start === end ? start + keyValue.length : start + 1;
@@ -203,8 +208,8 @@ function changeLang(event) {
 
 function updateAfterBackspaceDelete(event) {
   if (event.code === 'Backspace') {
-    let start = textarea.selectionStart;
-    let end = textarea.selectionEnd;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
     let finText;
     if (start === end) finText = textarea.value.substring(0, start - 1) + textarea.value.substring(end);
     else finText = textarea.value.substring(0, start) + textarea.value.substring(end);
@@ -213,8 +218,8 @@ function updateAfterBackspaceDelete(event) {
     textarea.selectionEnd = start === end ? start - 1 : start;
   }
   if (event.code === 'Delete') {
-    let start = textarea.selectionStart;
-    let end = textarea.selectionEnd;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
     let finText;
     if (start === end) finText = textarea.value.substring(0, start) + textarea.value.substring(end + 1);
     else finText = textarea.value.substring(0, start) + textarea.value.substring(end);
@@ -230,14 +235,15 @@ function handlerMouseDown(event) {
     event.preventDefault();
     return;
   }
-  event.code = event.target.id;
-  updateStyleActiveKey(event);
-  updateActiveCapsShift(event);
-  inputKeyToTextarea(event);
-  updateAfterBackspaceDelete(event);
-  changeLang(event);
-  event.stopPropagation();
-  event.preventDefault();
+  const newEvent = event;
+  newEvent.code = event.target.id;
+  updateStyleActiveKey(newEvent);
+  updateActiveCapsShift(newEvent);
+  inputKeyToTextarea(newEvent);
+  updateAfterBackspaceDelete(newEvent);
+  changeLang(newEvent);
+  newEvent.stopPropagation();
+  newEvent.preventDefault();
 }
 
 function handlerMouseUp(event) {
@@ -246,12 +252,14 @@ function handlerMouseUp(event) {
     event.preventDefault();
     return;
   }
-  event.code = event.target.id;
-  updateStyleInactiveKey(event);
-  updateStateInactiveShift(event);
-  changeLang(event);
-  event.stopPropagation();
-  event.preventDefault();
+  const newEvent = event;
+  newEvent.code = event.target.id;
+
+  window.setTimeout(updateStateInactiveShift.bind(this, newEvent), 800);
+  updateStyleInactiveKey(newEvent);
+  changeLang(newEvent);
+  newEvent.stopPropagation();
+  newEvent.preventDefault();
 }
 
 drawKeyboard();
@@ -265,4 +273,4 @@ document.addEventListener('keydown', updateAfterBackspaceDelete);
 document.addEventListener('keydown', inputKeyToTextarea);
 document.addEventListener('keydown', changeLang);
 keyboard.addEventListener('mousedown', handlerMouseDown);
-keyboard.addEventListener('mousedown', handlerMouseUp);
+keyboard.addEventListener('mouseup', handlerMouseUp);

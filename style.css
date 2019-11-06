@@ -30,6 +30,15 @@
   justify-content: space-between;
 }
 
+@keyframes anime {
+  0% {
+    background-color: cornflowerblue;
+  }
+  100% {
+    background-color: rgb(241, 241, 126);
+  }
+}
+
 .keyboard__key {
   display: flex;
   margin: 5px;
@@ -45,6 +54,10 @@
   -moz-user-select: none;
   -ms-user-select: none;
   cursor: pointer;
+}
+
+.key-animate {
+  animation: anime 1.5s linear;
 }
 
 .keyboard__key:hover {
