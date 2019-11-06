@@ -7,10 +7,10 @@ const row1Key = [
   ['Digit5', '5', '%', '5', '%'],
   ['Digit6', '6', ':', '6', '^'],
   ['Digit7', '7', '?', '7', '&'],
-  ['Digit8', '8', '', '8', ''],
+  ['Digit8', '8', '*', '8', '*'],
   ['Digit9', '9', '(', '9', '('],
   ['Digit0', '0', ')', '0', ')'],
-  ['Minus', '-', '', '-', ''],
+  ['Minus', '-', '-', '-', '-'],
   ['Equal', '=', '+', '=', '+'],
   ['Backspace', 'Backspace', 'Backspace', 'Backspace', 'Backspace'],
 ];
@@ -72,6 +72,7 @@ const row5Key = [
 const arrKeyValue = [row1Key, row2Key, row3Key, row4Key, row5Key];
 const keyboardFragment = document.createDocumentFragment();
 const textarea = document.createElement('textarea');
+textarea.id = 'textarea';
 const keyboard = document.createElement('div');
 let row1;
 let row2;
@@ -79,10 +80,8 @@ let row3;
 let row4;
 let row5;
 let arrKeyElements = [];
-if (localStorage.lang === 'en') localStorage.lang = 'ru';
-else localStorage.lang = 'en';
 let lang = localStorage.lang || 'en';
-let stateCaps = localStorage.stateCaps || false;
+let stateCaps = false;
 
 function drawRow(arrKey, parent) {
   const row = document.createElement('div');
@@ -110,15 +109,18 @@ function drawKeyboard() {
   row5 = drawRow(row5Key, keyboard);
   const childrensRow5 = row5.children;
 
-  row1.querySelector('div:last-child').classList.add('keyboard__backspace');
-  row2.querySelector('div:first-child').classList.add('keyboard__tab');
-  row2.querySelector('div:last-child').classList.add('keyboard__del');
-  row3.querySelector('div:first-child').classList.add('keyboard__caps');
-  row3.querySelector('div:last-child').classList.add('keyboard__enter');
-  row4.querySelector('div:first-child').classList.add('keyboard__shift-left');
-  row4.querySelector('div:last-child').classList.add('keyboard__shift-right');
-  Array.prototype.forEach.call(childrensRow5, elem => elem.classList.add('keyboard__ctrl-win-alt'));
+  row1.querySelector('div:last-child').classList.add('keyboard__backspace', 'keyboard__key-functional');
+  row2.querySelector('div:first-child').classList.add('keyboard__tab', 'keyboard__key-functional');
+  row2.querySelector('div:last-child').classList.add('keyboard__del', 'keyboard__key-functional');
+  row3.querySelector('div:first-child').classList.add('keyboard__caps', 'keyboard__key-functional');
+  console.log(`ffff ${stateCaps}`);
+  if (stateCaps === true) row3.querySelector('div:first-child').classList.add('active-key');
+  row3.querySelector('div:last-child').classList.add('keyboard__enter', 'keyboard__key-functional');
+  row4.querySelector('div:first-child').classList.add('keyboard__shift-left', 'keyboard__key-functional');
+  row4.querySelector('div:last-child').classList.add('keyboard__shift-right', 'keyboard__key-functional');
+  Array.prototype.forEach.call(childrensRow5, elem => elem.classList.add('keyboard__ctrl-win-alt', 'keyboard__key-functional'));
   row5.querySelector('div:nth-child(4)').classList.add('keyboard__space');
+  row5.querySelector('div:nth-child(4)').classList.remove('keyboard__key-functional');
 
   document.body.appendChild(keyboardFragment);
 }
@@ -139,22 +141,128 @@ function fillKey(param) {
 }
 
 function updateStyleActiveKey(event) {
+  event.preventDefault();
   const classListKey = document.getElementById(event.code).classList;
   if (!classListKey.contains('active-key')) classListKey.add('active-key');
 }
 function updateStyleInactiveKey(event) {
+  if (event.code === 'CapsLock' && stateCaps) return;
   const classListKey = document.getElementById(event.code).classList;
   if (classListKey.contains('active-key')) classListKey.remove('active-key');
 }
 
-function updateStateKeyboardCaps(event) {
-  if (event.code === 'Capslock') {
+function updateActiveCapsShift(event) {
+  if (event.code === 'CapsLock' || event.code === 'ShiftLeft' || event.code === 'ShiftRight') {
+    stateCaps = !stateCaps;
+    fillKey(lang);
   }
+}
+
+function updateStateInactiveShift(event) {
+  if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') {
+    stateCaps = !stateCaps;
+    fillKey(lang);
+  }
+}
+
+function inputKeyToTextarea(event) {
+  event.preventDefault();
+  let keyValue;
+  arrKeyValue.forEach(row => {
+    let key = row.filter(key => key[0] === event.code);
+    if (key[0]) {
+      if (lang === 'en') {
+        if (stateCaps) keyValue = key[0][4];
+        else keyValue = key[0][3];
+      } else {
+        if (stateCaps) keyValue = key[0][2];
+        else keyValue = key[0][1];
+      }
+    }
+  });
+  if (keyValue.length === 1) {
+    let start = textarea.selectionStart;
+    let end = textarea.selectionEnd;
+    let finText = textarea.value.substring(0, start) + keyValue + textarea.value.substring(end);
+    textarea.value = finText;
+    textarea.focus();
+    textarea.selectionEnd = start === end ? start + keyValue.length : start + 1;
+  }
+
+  event.stopPropagation();
+}
+
+function changeLang(event) {
+  if ((event.code === 'ShiftLeft' || event.code === 'ShiftRight') && event.altKey) {
+    if (lang === 'en') lang = 'ru';
+    else lang = 'en';
+    localStorage.lang = lang;
+    fillKey(lang);
+  }
+}
+
+function updateAfterBackspaceDelete(event) {
+  if (event.code === 'Backspace') {
+    let start = textarea.selectionStart;
+    let end = textarea.selectionEnd;
+    let finText;
+    if (start === end) finText = textarea.value.substring(0, start - 1) + textarea.value.substring(end);
+    else finText = textarea.value.substring(0, start) + textarea.value.substring(end);
+    textarea.value = finText;
+    textarea.focus();
+    textarea.selectionEnd = start === end ? start - 1 : start;
+  }
+  if (event.code === 'Delete') {
+    let start = textarea.selectionStart;
+    let end = textarea.selectionEnd;
+    let finText;
+    if (start === end) finText = textarea.value.substring(0, start) + textarea.value.substring(end + 1);
+    else finText = textarea.value.substring(0, start) + textarea.value.substring(end);
+    textarea.value = finText;
+    textarea.focus();
+    textarea.selectionEnd = start;
+  }
+}
+
+function handlerMouseDown(event) {
+  if (event.target.classList.contains('keyboard') || event.target.classList.contains('keyboard__row')) {
+    event.stopPropagation();
+    event.preventDefault();
+    return;
+  }
+  event.code = event.target.id;
+  updateStyleActiveKey(event);
+  updateActiveCapsShift(event);
+  inputKeyToTextarea(event);
+  updateAfterBackspaceDelete(event);
+  changeLang(event);
+  event.stopPropagation();
+  event.preventDefault();
+}
+
+function handlerMouseUp(event) {
+  if (event.target.classList.contains('keyboard') || event.target.classList.contains('keyboard__row')) {
+    event.stopPropagation();
+    event.preventDefault();
+    return;
+  }
+  event.code = event.target.id;
+  updateStyleInactiveKey(event);
+  updateStateInactiveShift(event);
+  changeLang(event);
+  event.stopPropagation();
+  event.preventDefault();
 }
 
 drawKeyboard();
 arrKeyElements = [row1, row2, row3, row4, row5];
 fillKey(lang);
-document.addEventListener('keydown', updateStateKeyboardCaps);
+document.addEventListener('keydown', updateActiveCapsShift);
+document.addEventListener('keyup', updateStateInactiveShift);
 document.addEventListener('keydown', updateStyleActiveKey);
 document.addEventListener('keyup', updateStyleInactiveKey);
+document.addEventListener('keydown', updateAfterBackspaceDelete);
+document.addEventListener('keydown', inputKeyToTextarea);
+document.addEventListener('keydown', changeLang);
+keyboard.addEventListener('mousedown', handlerMouseDown);
+keyboard.addEventListener('mousedown', handlerMouseUp);

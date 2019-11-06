@@ -22,7 +22,7 @@
   padding: 10px;
   border-radius: 10px;
   flex-direction: column;
-  background-color: rgb(255, 182, 182);
+  background-color: rgb(226, 209, 209);
 }
 
 .keyboard__row {
@@ -44,6 +44,16 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  cursor: pointer;
+}
+
+.keyboard__key:hover {
+  background: cornsilk;
+  color: black;
+}
+
+.keyboard__key-functional {
+  background: rgb(245, 178, 34);
 }
 
 .active-key {
